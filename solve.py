@@ -42,9 +42,10 @@ def gmres(A, b, x0, k):
 
 
         print((np.asarray(q)))
-        print(np.shape(res))
+        print(np.shape(q))
+        print(np.shape(yk))
         
-        x.append(np.dot(np.asarray(q).transpose(),res) + x0)
+        x.append(np.dot(np.transpose(q),yk) + x0)
 
         print(x)
         
