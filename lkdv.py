@@ -3,6 +3,7 @@ from firedrake import *
 import numpy as np
 import matplotlib.pylab as plt
 
+
 def exact(x,t):
     """
     An "exact" initial condition for the linear KdV equation
@@ -50,7 +51,7 @@ def linforms(N=100,M=50,T=1):
 
     #Read out A and b
     A = assemble(lhs(F),mat_type='aij').M.values
-    b = assemble(rhs(F)).dat.data
+    b = np.asarray(assemble(rhs(F)).dat.data).reshape(-1)
 
     #Get form for mass matrix
     M_form = u_trial * phi * dx
@@ -67,7 +68,8 @@ def linforms(N=100,M=50,T=1):
     u0, v0 = z0.split()
     u0.assign(interpolate(x[0],U))
     v0.assign(interpolate(x[0],U))
-    x_vec = assemble(z0).dat.data
+    x_vec = np.asarray(assemble(z0).dat.data).reshape(-1)
+
 
     #Generate output dictionary
     out = {
