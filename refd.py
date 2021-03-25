@@ -1,0 +1,28 @@
+'''
+A script of functions to put objects back into Firedrake data structures
+'''
+#global
+from firedrake import *
+import numpy as np
+import matplotlib.pylab as plt
+#local
+import solve
+import lkdv
+
+
+def nptofd(prob,vec):
+
+    #seperate vector components
+    vec1, vec2 = np.split(vec, 2)
+
+    #Set up spaces
+    m = prob.mesh()
+    Z = prob.function_space(m)
+
+    z = Function(Z)
+    u, v = z.split()
+    #Copy in external data
+    u.dat.data[:] = vec1[:]
+    v.dat.data[:] = vec2[:]
+
+    return z
