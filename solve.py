@@ -8,8 +8,6 @@ import lkdv
 def gmres(A, b, x0, k):
 
     x = []
-    r = []
-    Q = []
     r = (b - np.dot(A,x0)) #define r0
 
     x.append(r)
@@ -17,9 +15,9 @@ def gmres(A, b, x0, k):
          
     q = [0] * k #initalise stuff
 
-    beta = np.linalg.norm(r[0])
+    beta = np.linalg.norm(r)
     
-    q[0] = r[0] / beta #normalise r0
+    q[0] = r / beta #normalise r0
     
     #convert type
     
@@ -32,24 +30,18 @@ def gmres(A, b, x0, k):
             h[i,j] = np.dot(q[i],y)
             y = y - h[i,j] * q[i]
         h[j+1,j] = np.linalg.norm(y)
-        if (h[j+1,j] != 0 and k!=j-1):
+        if (h[j+1,j] != 0 and j!=k-1):
             q[j+1] =  y / h[j+1,j]
 
         res = np.zeros(k+1)
         res[0] = beta
 
-        yk = np.linalg.lstsq(h, res)
+        
+        yk = np.linalg.lstsq(h, res)[-1]
+        print(yk)
 
-
-        print((np.asarray(q)))
-        print(np.shape(q))
-        print(np.shape(yk))
         
         x.append(np.dot(np.transpose(q),yk) + x0)
-
-        print(x)
-        
-        input('pause')
     
     
     print(x)
@@ -62,7 +54,7 @@ def gmres(A, b, x0, k):
 
 if __name__=="__main__":
 
-    params = lkdv.linforms()
+    params, prob = lkdv.linforms()
 
     print(gmres(params['A'],
                 params['b'],
