@@ -3,22 +3,39 @@ from firedrake import *
 import numpy as np
 import matplotlib.pylab as plt
 
+#local
+import refd
 
-def exact(x,t):
-    """
-    An "exact" initial condition for the linear KdV equation
-    """
-    alpha = 4
-    period = 2*pi/40
-    beta = alpha*period
-    u = sin(beta*(x-(1-beta**2)*t))
-    return u
+class problem(object):
+    def __init__(self,N,M):
+        self.mlength = 40
+        self.degree = 1
+        self.N = N
+        self.M = M
+
+    def mesh(self):
+        return PeriodicIntervalMesh(self.M,self.mlength)
+
+    def function_space(self,mesh):
+        U = FunctionSpace(mesh,"CG",self.degree)
+        return MixedFunctionSpace((U,U))
+
+    def exact(self,x,t):
+        """
+        An "exact" initial condition for the linear KdV equation
+        """
+        alpha = 4
+        period = 2*pi/self.mlength
+        beta = alpha*period
+        u = sin(beta*(x-(1-beta**2)*t))
+        return u
 
 def linforms(N=100,M=50,T=1):
+    #set up problem class
+    prob = problem(N=N,M=M)
     #Set up finite element stuff
-    mesh = PeriodicIntervalMesh(M,40)
-    U = FunctionSpace(mesh,"CG",1)
-    Z = MixedFunctionSpace((U,U))
+    mesh = prob.mesh()
+    Z = prob.function_space(mesh)
 
     #Set up initial conditions
     z0 = Function(Z)
@@ -26,7 +43,7 @@ def linforms(N=100,M=50,T=1):
 
     t = 0.
     x = SpatialCoordinate(Z.mesh())
-    u0.assign(project(exact(x[0],t),U))
+    u0.assign(project(prob.exact(x[0],t),Z.sub(0)))
 
     #Define timestep
     dt = float(T)/N
@@ -66,8 +83,8 @@ def linforms(N=100,M=50,T=1):
 
     #Generate x vector
     u0, v0 = z0.split()
-    u0.assign(interpolate(x[0],U))
-    v0.assign(interpolate(x[0],U))
+    u0.assign(interpolate(x[0],Z.sub(0)))
+    v0.assign(interpolate(x[0],Z.sub(0)))
     x_vec = np.asarray(assemble(z0).dat.data).reshape(-1)
 
 
@@ -82,8 +99,11 @@ def linforms(N=100,M=50,T=1):
         'e0': e0,
     }
         
-    return out
+    return out, prob
 
 
 if __name__=="__main__":
-    print(linforms())
+    dict, prob = linforms()
+    print(dict)
+
+    refd.nptofd(prob,dict['b'])
