@@ -1,8 +1,10 @@
 #global
 from firedrake import *
 import numpy as np
+import matplotlib.pylab as plt
 #local
 import lkdv
+import refd
 
 
 def gmres(A, b, x0, k):
@@ -37,7 +39,7 @@ def gmres(A, b, x0, k):
         res[0] = beta
 
         
-        yk = np.linalg.lstsq(h, res)[-1]
+        yk = np.linalg.lstsq(h, res)[0]
         print(yk)
 
         
@@ -48,7 +50,7 @@ def gmres(A, b, x0, k):
     
 
 
-    return -1
+    return x
 
 
 
@@ -56,10 +58,23 @@ if __name__=="__main__":
 
     params, prob = lkdv.linforms()
 
-    print(gmres(params['A'],
-                params['b'],
-                x0=np.ones_like(params['b']),
-                k=4
-                )
-          )
+    k = 10
     
+    x = gmres(params['A'],
+              params['b'],
+              x0=np.ones_like(params['b']),
+              k=k)
+
+
+    #plot some solutions
+    Z = prob.function_space(prob.mesh())
+    x_fd = SpatialCoordinate(Z.mesh())
+    z0 = Function(Z)
+    u0,v0 = z0.split()
+    u0.assign(project(prob.exact(x_fd[0],0),Z.sub(0)))
+    plot(u0)
+    for i in range(k):
+        z = refd.nptofd(prob,x[i])
+        plot(z.sub(0))
+        
+        plt.show()
