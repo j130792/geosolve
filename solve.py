@@ -1,11 +1,24 @@
 #global
 from firedrake import *
 import numpy as np
+import scipy.sparse.linalg as spsla
 import matplotlib.pylab as plt
+import pyamg.krylov as pak
 #local
 import lkdv
 import refd
 
+
+class krylov_counter_gmres(object):
+    def __init__(self,disp=True):
+        self._disp = disp
+        self.niter = 0
+    def __call__(self, rk=None):
+        self.niter += 1
+        if self._disp:
+            print('iter %3i\trelative rk = %s' % (self.niter, str(rk)))
+    def num_its(self):
+        return self.niter
 
 def gmres(A, b, x0, k):
 
@@ -15,7 +28,7 @@ def gmres(A, b, x0, k):
     x.append(r)
 
          
-    q = [0] * k #initalise stuff
+    q = np.zeros((k+1,np.size(r)))
 
     beta = np.linalg.norm(r)
     
@@ -23,27 +36,33 @@ def gmres(A, b, x0, k):
     
     #convert type
     
-    h = np.zeros((k+1,k))    
+    h = np.zeros((k+1,k))
     
     for j in range(k):
-        y = np.asarray(np.dot(A,q[j]))
+        y = np.asarray(A @ q[j])
         
         for i in range(j):
             h[i,j] = np.dot(q[i],y)
             y = y - h[i,j] * q[i]
         h[j+1,j] = np.linalg.norm(y)
-        if (h[j+1,j] != 0 and j!=k-1):
+        if (h[j+1,j] != 0):
             q[j+1] =  y / h[j+1,j]
 
-        res = np.zeros(k+1)
+        res = np.zeros(j+2)
         res[0] = beta
 
         
-        yk = np.linalg.lstsq(h, res)[0]
-        print(yk)
+        yk = np.linalg.lstsq(h[:j+2,:j+1], res)[0]
+        # print(yk)
 
+        # print(np.shape(q))
+        # print(np.shape(yk))
+        # print(np.shape(x0))
+        # input('pause')
         
-        x.append(np.dot(np.transpose(q),yk) + x0)
+        x.append(np.transpose(q[:j+1,:]) @ yk + x0)
+        # print(np.shape(x))
+        # input('pause')
     
     
     print(x)
@@ -62,9 +81,30 @@ if __name__=="__main__":
     
     x = gmres(params['A'],
               params['b'],
-              x0=np.ones_like(params['b']),
+              x0=np.zeros_like(params['b']),
               k=k)
 
+    counter = krylov_counter_gmres()
+    
+    x_benchmark, _ = spsla.gmres(params['A'],
+                                 params['b'],
+                                 x0=np.zeros_like(params['b']),
+                                 tol=1e-1000,
+                                 maxiter=k,
+                                 restart=2*k,
+                              callback=counter)
+
+    x_pak, _ = pak.gmres(params['A'],
+                         params['b'],
+                         x0=np.zeros_like(params['b']),
+                         maxiter=k,
+                         tol= 1e-10)
+
+    print(np.shape(x[-1]))
+    print(np.shape(x_pak))
+    input('pause')
+    print(x_pak-x[-1])
+    input('pause')
 
     #plot some solutions
     Z = prob.function_space(prob.mesh())
@@ -73,8 +113,12 @@ if __name__=="__main__":
     u0,v0 = z0.split()
     u0.assign(project(prob.exact(x_fd[0],0),Z.sub(0)))
     plot(u0)
-    for i in range(k):
+    for i in range(k-1,k):
         z = refd.nptofd(prob,x[i])
-        plot(z.sub(0))
+        z2 = refd.nptofd(prob,x_pak)
+        zd = refd.nptofd(prob,x[i]-x_pak[:])
+        plot(z.sub(1))
+        plot(z2.sub(1))
+        plot(zd.sub(1))
         
         plt.show()
