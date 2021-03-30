@@ -41,7 +41,7 @@ def gmres(A, b, x0, k):
     for j in range(k):
         y = np.asarray(A @ q[j])
         
-        for i in range(j):
+        for i in range(j+1):
             h[i,j] = np.dot(q[i],y)
             y = y - h[i,j] * q[i]
         h[j+1,j] = np.linalg.norm(y)
@@ -50,24 +50,11 @@ def gmres(A, b, x0, k):
 
         res = np.zeros(j+2)
         res[0] = beta
-
         
         yk = np.linalg.lstsq(h[:j+2,:j+1], res)[0]
-        # print(yk)
-
-        # print(np.shape(q))
-        # print(np.shape(yk))
-        # print(np.shape(x0))
-        # input('pause')
         
         x.append(np.transpose(q[:j+1,:]) @ yk + x0)
-        # print(np.shape(x))
-        # input('pause')
     
-    
-    print(x)
-    
-
 
     return x
 
@@ -77,7 +64,7 @@ if __name__=="__main__":
 
     params, prob = lkdv.linforms()
 
-    k = 10
+    k = 3
     
     x = gmres(params['A'],
               params['b'],
@@ -98,12 +85,11 @@ if __name__=="__main__":
                          params['b'],
                          x0=np.zeros_like(params['b']),
                          maxiter=k,
-                         tol= 1e-10)
+                         tol= 1e-10,
+                         orthog='mgs')
 
-    print(np.shape(x[-1]))
-    print(np.shape(x_pak))
-    input('pause')
-    print(x_pak-x[-1])
+
+    print('gmres error =', np.max(x_pak-x[-1]))
     input('pause')
 
     #plot some solutions
@@ -116,9 +102,7 @@ if __name__=="__main__":
     for i in range(k-1,k):
         z = refd.nptofd(prob,x[i])
         z2 = refd.nptofd(prob,x_pak)
-        zd = refd.nptofd(prob,x[i]-x_pak[:])
-        plot(z.sub(1))
-        plot(z2.sub(1))
-        plot(zd.sub(1))
+        plot(z.sub(0))
+        plot(z2.sub(0))
         
         plt.show()
