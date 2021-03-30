@@ -20,8 +20,17 @@ class krylov_counter_gmres(object):
     def num_its(self):
         return self.niter
 
-def gmres(A, b, x0, k):
+def gmres(A, b, x0, k, M = None):
 
+    #If not using preconditioner, set up identity as placeholder
+    if M is None:
+        M = np.identity(np.size(A[0,:]))
+
+    #Check preconditioner dimensions make sense
+    if np.shape(A)!=np.shape(M):
+        raise ValueError('The matrix A must have the same structure',
+                         ' as preconditioner M')
+        
     x = []
     r = (b - np.dot(A,x0)) #define r0
 
@@ -39,7 +48,7 @@ def gmres(A, b, x0, k):
     h = np.zeros((k+1,k))
     
     for j in range(k):
-        y = np.asarray(A @ q[j])
+        y = np.asarray(A @ M @ q[j])
         
         for i in range(j+1):
             h[i,j] = np.dot(q[i],y)
