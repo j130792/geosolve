@@ -76,6 +76,8 @@ def linforms(N=100,M=50,T=1):
     #And for L
     L_form = u_trial.dx(0) * phi.dx(0) * dx
     L = assemble(lhs(L_form),mat_type='aij').M.values
+    #And the vector needed for finding the mass
+    omega = np.asarray(assemble(phi * dx).dat.data).reshape(-1)
 
     #Get the initial values for the invariants
     m0 = assemble(u0*dx)
@@ -95,6 +97,7 @@ def linforms(N=100,M=50,T=1):
         'x': x_vec,
         'M': M,
         'L': L,
+        'omega': omega,
         'm0': m0,
         'e0': e0,
     }
