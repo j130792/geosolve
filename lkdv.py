@@ -102,6 +102,20 @@ def linforms(N=100,M=50,T=1):
     return out, prob
 
 
+def compute_invariants(prob,uvec):
+    z = refd.nptofd(prob,uvec)
+    u,v = z.split()
+    mass = assemble(u*dx)
+    momentum = assemble(u**2*dx)
+    energy = assemble((0.5 * u.dx(0)**2 - 0.5 * u**2)*dx)
+
+    inv_dict = {'mass' : mass,
+                'momentum' : momentum,
+                'energy' : energy}
+
+    return inv_dict
+
+
 if __name__=="__main__":
     dict, prob = linforms()
     print(dict)
