@@ -62,7 +62,7 @@ def gmres(A, b, x0, k, M = None):
         
         yk = np.linalg.lstsq(h[:j+2,:j+1], res)[0]
         
-        x.append(np.transpose(q[:j+1,:]) @ yk + x0)
+        x.append(M @ np.transpose(q[:j+1,:]) @ yk + x0)
     
 
     return x
