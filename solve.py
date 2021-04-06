@@ -108,10 +108,13 @@ if __name__=="__main__":
     u0,v0 = z0.split()
     u0.assign(project(prob.exact(x_fd[0],0),Z.sub(0)))
     plot(u0)
-    for i in range(k-1,k):
+    for i in range(0,k):
         z = refd.nptofd(prob,x[i])
         z2 = refd.nptofd(prob,x_pak)
         plot(z.sub(0))
         plot(z2.sub(0))
+        inv = lkdv.compute_invariants(prob,x[i])
+        print('mass dev =', inv['mass']-params['m0'])
+        print('energy dev =', inv['energy']-params['e0'])
         
         plt.show()
