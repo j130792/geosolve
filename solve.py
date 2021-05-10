@@ -7,6 +7,7 @@ import pyamg.krylov as pak
 #local
 import lkdv
 import refd
+import geosolve as gs
 
 
 class krylov_counter_gmres(object):
@@ -68,27 +69,26 @@ def gmres(A, b, x0, k, M = None):
     return x
 
 
-
 if __name__=="__main__":
 
     params, prob = lkdv.linforms()
 
-    k = 3
+    k = 5
     
     x = gmres(params['A'],
               params['b'],
               x0=np.zeros_like(params['b']),
               k=k)
 
-    counter = krylov_counter_gmres()
-    
-    x_benchmark, _ = spsla.gmres(params['A'],
-                                 params['b'],
-                                 x0=np.zeros_like(params['b']),
-                                 tol=1e-1000,
-                                 maxiter=k,
-                                 restart=2*k,
-                              callback=counter)
+    x_con = gs.gmres_e(A = params['A'], b = params['b'],
+                       x0=np.zeros_like(params['b']),
+                       k=k,
+                       M = params['M'], L = params['L'],
+                       omega = params['omega'], m0 = params['m0'],
+                       e0 = params['e0'])
+
+    input('geosolve complete')
+                             
 
     x_pak, _ = pak.gmres(params['A'],
                          params['b'],
@@ -98,7 +98,7 @@ if __name__=="__main__":
                          orthog='mgs')
 
 
-    print('gmres error =', np.max(x_pak-x[-1]))
+    print('gmres error on conservation =', np.max(x_con[-1]-x[-1]))
     input('pause')
 
     #plot some solutions
@@ -110,7 +110,7 @@ if __name__=="__main__":
     plot(u0)
     for i in range(0,k):
         z = refd.nptofd(prob,x[i])
-        z2 = refd.nptofd(prob,x_pak)
+        z2 = refd.nptofd(prob,x_con[i])
         plot(z.sub(0))
         plot(z2.sub(0))
         inv = lkdv.compute_invariants(prob,x[i])
