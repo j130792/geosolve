@@ -4,7 +4,7 @@ Here we construct modified gmres algorithms
 #Global imports
 import numpy as np
 import matplotlib.pylab as plt
-
+import scipy.optimize as spo
 
 def gmres_e(A, b, x0, k,
             M, L, omega, m0, e0,
@@ -45,13 +45,54 @@ def gmres_e(A, b, x0, k,
         if (h[j+1,j] != 0):
             q[j+1] =  y / h[j+1,j]
 
-        res = np.zeros(j+2)
+        res = np.zeros(2+1)
         res[0] = beta
 
         Q = np.transpose(q[:j+1,:]) #Allocate current size of Q
         Qt = np.transpose(Q)
+
+        #Set up function
+        def func(z):
+            F = r - A @ Q @ z
+            out = np.inner(F,F)
+            return out
+
+        #Add first constraint
+        def const1(z):
+            X = A @ Q @ z
+            out = np.transpose(omega) @ X - m0
+            return out
+        con1 = {"type": "eq",
+                "fun": const1}
+
+        #second constraint
+        def const2(z):
+            X = A @ Q @ z
+            out = 0.5 * np.transpose(X) @ L @ X \
+                - 0.5 * np.transpose(X) @ M @ X \
+                - e0
+            return out
+        con2 = {"type": "eq",
+                "fun": const2}
+
+            
+        y0 = np.zeros((j+1,))
+        yk = spo.minimize(func,y0,tol=1e-12,
+                          constraints=[]).x
+
+        # print(yk)
         
-        yk = np.linalg.lstsq(A @ Q, r)[0]
+        # # input('pause')
+            
+        # # yk = np.linalg.lstsq(A @ Q, r)[0]
+
+        # print(np.shape(r))
+        # print(np.shape(res))
+        # print(np.shape(yk))
+        # print(np.shape(y))
+        # input('')
+
+        
         
         x.append(pre @ Q @ yk + x0)
     

@@ -86,19 +86,17 @@ if __name__=="__main__":
                        M = params['M'], L = params['L'],
                        omega = params['omega'], m0 = params['m0'],
                        e0 = params['e0'])
-
-    input('geosolve complete')
                              
 
-    x_pak, _ = pak.gmres(params['A'],
-                         params['b'],
-                         x0=np.zeros_like(params['b']),
-                         maxiter=k,
-                         tol= 1e-10,
-                         orthog='mgs')
+    # x_pak, _ = pak.gmres(params['A'],
+    #                      params['b'],
+    #                      x0=np.zeros_like(params['b']),
+    #                      maxiter=k,
+    #                      tol= 1e-10,
+    #                      orthog='mgs')
 
 
-    print('gmres error on conservation =', np.max(x_con[-1]-x[-1]))
+    print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])))
     input('pause')
 
     #plot some solutions
@@ -114,7 +112,12 @@ if __name__=="__main__":
         plot(z.sub(0))
         plot(z2.sub(0))
         inv = lkdv.compute_invariants(prob,x[i])
+        inv2 = lkdv.compute_invariants(prob,x_con[i])
+        print('Standard GMRES:')
         print('mass dev =', inv['mass']-params['m0'])
         print('energy dev =', inv['energy']-params['e0'])
-        
+
+        print("'Conservative' GMRES:")
+        print('mass dev =', inv2['mass']-params['m0'])
+        print('energy dev =', inv2['energy']-params['e0'])
         plt.show()
