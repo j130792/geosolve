@@ -59,7 +59,7 @@ def gmres_e(A, b, x0, k,
 
         #Add first constraint
         def const1(z):
-            X = A @ Q @ z
+            X = x0 + Q @ z
             out = np.transpose(omega) @ X - m0
             return out
         con1 = {"type": "eq",
@@ -67,7 +67,7 @@ def gmres_e(A, b, x0, k,
 
         #second constraint
         def const2(z):
-            X = A @ Q @ z
+            X = x0 + Q @ z
             out = 0.5 * np.transpose(X) @ L @ X \
                 - 0.5 * np.transpose(X) @ M @ X \
                 - e0
