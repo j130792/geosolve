@@ -20,6 +20,7 @@ def gmres_e(A, b, x0, k,
                          ' as preconditioner M')
         
     x = []
+    residual = []
     r = (b - np.dot(A,x0)) #define r0
 
     x.append(r)
@@ -104,9 +105,16 @@ def gmres_e(A, b, x0, k,
                                        'xtol': eps,
                                        'barrier_tol': eps}).x
         
-        
         x.append(pre @ Q @ yk + x0)
-    
 
-    return x
+        #Compute residual
+        residual.append(np.linalg.norm(A @ x[-1] - b))
+
+
+    #build output dictionary
+    dict = {'name':'geosolve',
+            'x': x,
+            'res': residual}
+
+    return x, dict
 

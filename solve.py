@@ -8,6 +8,7 @@ import pyamg.krylov as pak
 import lkdv
 import refd
 import geosolve as gs
+import visualise as vis
 
 
 class krylov_counter_gmres(object):
@@ -33,6 +34,7 @@ def gmres(A, b, x0, k, M = None):
                          ' as preconditioner M')
         
     x = []
+    residual = []
     r = (b - np.dot(A,x0)) #define r0
 
     x.append(r)
@@ -64,9 +66,14 @@ def gmres(A, b, x0, k, M = None):
         yk = np.linalg.lstsq(h[:j+2,:j+1], res)[0]
         
         x.append(M @ np.transpose(q[:j+1,:]) @ yk + x0)
-    
+        residual.append(np.linalg.norm(A @ x[-1] - b))
 
-    return x
+    #Build output dictionary
+    dict = {'name': 'gmres',
+            'x':x,
+            'res':residual}
+
+    return x, dict
 
 
 if __name__=="__main__":
@@ -75,12 +82,12 @@ if __name__=="__main__":
 
     k = 5
     
-    x = gmres(params['A'],
+    x, solvedict = gmres(params['A'],
               params['b'],
               x0=np.zeros_like(params['b']),
               k=k)
 
-    x_con = gs.gmres_e(A = params['A'], b = params['b'],
+    x_con, geodict = gs.gmres_e(A = params['A'], b = params['b'],
                        x0=np.zeros_like(params['b']),
                        k=k,
                        M = params['M'], L = params['L'],
@@ -99,6 +106,10 @@ if __name__=="__main__":
     print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])/x[-1]))
     input('pause')
 
+    vis.tabulator(params,prob,[solvedict,geodict])
+    
+    input('pause before plots')
+    
     #plot some solutions
     Z = prob.function_space(prob.mesh())
     x_fd = SpatialCoordinate(Z.mesh())
