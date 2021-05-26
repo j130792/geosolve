@@ -96,7 +96,7 @@ if __name__=="__main__":
     #                      orthog='mgs')
 
 
-    print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])))
+    print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])/x[-1]))
     input('pause')
 
     #plot some solutions
