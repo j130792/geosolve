@@ -75,23 +75,34 @@ def gmres_e(A, b, x0, k,
         con2 = {"type": "eq",
                 "fun": const2}
 
-            
+        eps = 1e-14
+        #Initialise guess
         y0 = np.zeros((j+1,))
-        yk = spo.minimize(func,y0,tol=1e-12,
-                          constraints=[]).x
-
-        # print(yk)
-        
-        # # input('pause')
-            
-        # # yk = np.linalg.lstsq(A @ Q, r)[0]
-
-        # print(np.shape(r))
-        # print(np.shape(res))
-        # print(np.shape(yk))
-        # print(np.shape(y))
-        # input('')
-
+        #For the first iteration just use gmres
+        if j==0:
+            yk = spo.minimize(func,y0,tol=eps,
+                              method='trust-constr',
+                              options={'gtol': eps,
+                                       'xtol': eps,
+                                       'barrier_tol': eps}).x
+            #Second iteration add mass constraint
+        elif j==1:
+            y0[:-1] = yk
+            yk = spo.minimize(func,y0,tol=eps,
+                              constraints=[con1],
+                              method='trust-constr',
+                              options={'gtol': eps,
+                                       'xtol': eps,
+                                       'barrier_tol': eps}).x
+            #For all other iterations add both constraints
+        else:
+            y0[:-1] = yk
+            yk = spo.minimize(func,y0,tol=eps,
+                              constraints=[con1,con2],
+                              method='trust-constr',
+                              options={'gtol': eps,
+                                       'xtol': eps,
+                                       'barrier_tol': eps}).x
         
         
         x.append(pre @ Q @ yk + x0)
