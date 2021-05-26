@@ -1,7 +1,7 @@
 #global
 from firedrake import *
 import numpy as np
-from tabulate import tabulate
+import pandas as pd
 from prettytable import PrettyTable
 
 # local
@@ -10,15 +10,16 @@ import refd
 import solve
 
 #initialise global lists
-
-headers = []
-t = PrettyTable()
 ## here we will tabulate data
-def tabulator(params,prob,dict_list):
+def tabulator(params,prob,dict_list,filename='table'):
+    #initalise tables
+    t = PrettyTable()
+    df = pd.DataFrame()
     #loop over dictionaries (each is a method)
     for data in dict_list:
         name = data['name']
         t.add_column(name + ' res', data['res'])
+        df[name + ' residual norm'] = data['res']
 
         #compute invariants
         dev1 = []
@@ -30,10 +31,18 @@ def tabulator(params,prob,dict_list):
 
         t.add_column(name + ' m dev', dev1)
         t.add_column(name + ' e dev', dev2)
+        df[name + ' mass deviation'] = dev1
+        df[name + ' energy deviation'] = dev2
 
 
+    #write to file
+    texfile = open(filename + '.tex', 'w')
+    texfile.write(df.to_latex(index=False))
+    texfile.close()
+    df.to_csv(filename + '.csv', index=False)
+        
     print(t)
 
-    return t
+    return df
         
         
