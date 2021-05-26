@@ -27,7 +27,7 @@ class problem(object):
         alpha = 4
         period = 2*pi/self.mlength
         beta = alpha*period
-        u = sin(beta*(x-(1-beta**2)*t))
+        u = sin(beta*(x-(1-beta**2)*t)) + 1
         return u
 
 def linforms(N=100,M=50,T=1):
