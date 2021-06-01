@@ -88,18 +88,18 @@ def gmres_e(A, b, x0, k,
                                        'barrier_tol': eps}).x
             #Second iteration add mass constraint
         elif j==1:
-            y0[:-1] = yk
+            #y0[:-1] = yk
             yk = spo.minimize(func,y0,tol=eps,
-                              constraints=[con1],
+                              constraints=[],
                               method='trust-constr',
                               options={'gtol': eps,
                                        'xtol': eps,
                                        'barrier_tol': eps}).x
             #For all other iterations add both constraints
         else:
-            y0[:-1] = yk
+            #y0[:-1] = yk
             yk = spo.minimize(func,y0,tol=eps,
-                              constraints=[con1,con2],
+                              constraints=[],
                               method='trust-constr',
                               options={'gtol': eps,
                                        'xtol': eps,

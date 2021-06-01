@@ -80,7 +80,7 @@ if __name__=="__main__":
 
     params, prob = lkdv.linforms()
 
-    k = 5
+    k = 8
     
     x, solvedict = gmres(params['A'],
               params['b'],
@@ -108,27 +108,27 @@ if __name__=="__main__":
 
     vis.tabulator(params,prob,[solvedict,geodict])
     
-    input('pause before plots')
+    # input('pause before plots')
     
-    #plot some solutions
-    Z = prob.function_space(prob.mesh())
-    x_fd = SpatialCoordinate(Z.mesh())
-    z0 = Function(Z)
-    u0,v0 = z0.split()
-    u0.assign(project(prob.exact(x_fd[0],0),Z.sub(0)))
-    plot(u0)
-    for i in range(0,k):
-        z = refd.nptofd(prob,x[i])
-        z2 = refd.nptofd(prob,x_con[i])
-        plot(z.sub(0))
-        plot(z2.sub(0))
-        inv = lkdv.compute_invariants(prob,x[i])
-        inv2 = lkdv.compute_invariants(prob,x_con[i])
-        print('Standard GMRES:')
-        print('mass dev =', inv['mass']-params['m0'])
-        print('energy dev =', inv['energy']-params['e0'])
+    # #plot some solutions
+    # Z = prob.function_space(prob.mesh())
+    # x_fd = SpatialCoordinate(Z.mesh())
+    # z0 = Function(Z)
+    # u0,v0 = z0.split()
+    # u0.assign(project(prob.exact(x_fd[0],0),Z.sub(0)))
+    # plot(u0)
+    # for i in range(0,k):
+    #     z = refd.nptofd(prob,x[i])
+    #     z2 = refd.nptofd(prob,x_con[i])
+    #     plot(z.sub(0))
+    #     plot(z2.sub(0))
+    #     inv = lkdv.compute_invariants(prob,x[i])
+    #     inv2 = lkdv.compute_invariants(prob,x_con[i])
+    #     print('Standard GMRES:')
+    #     print('mass dev =', inv['mass']-params['m0'])
+    #     print('energy dev =', inv['energy']-params['e0'])
 
-        print("'Conservative' GMRES:")
-        print('mass dev =', inv2['mass']-params['m0'])
-        print('energy dev =', inv2['energy']-params['e0'])
-        plt.show()
+    #     print("'Conservative' GMRES:")
+    #     print('mass dev =', inv2['mass']-params['m0'])
+    #     print('energy dev =', inv2['energy']-params['e0'])
+    #     plt.show()
