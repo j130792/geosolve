@@ -46,7 +46,7 @@ def gmres_e(A, b, x0, k,
         if (h[j+1,j] != 0):
             q[j+1] =  y / h[j+1,j]
 
-        res = np.zeros(2+1)
+        res = np.zeros(j+2)
         res[0] = beta
 
         Q = np.transpose(q[:j+1,:]) #Allocate current size of Q
@@ -54,7 +54,7 @@ def gmres_e(A, b, x0, k,
 
         #Set up function
         def func(z):
-            F = r - A @ Q @ z
+            F = res - h[:j+2,:j+1] @ z
             out = np.inner(F,F)
             return out
 
@@ -79,31 +79,34 @@ def gmres_e(A, b, x0, k,
         eps = 1e-14
         #Initialise guess
         y0 = np.zeros((j+1,))
-        #For the first iteration just use gmres
         if j==0:
+            yk = y0
+        y0[:-1] = yk
+        #For the first iteration just use gmres
+        if 1>0:#j==0:
             yk = spo.minimize(func,y0,tol=eps,
-                              method='trust-constr',
+                              method='SLSQP',
                               options={'gtol': eps,
                                        'xtol': eps,
-                                       'barrier_tol': eps}).x
-            #Second iteration add mass constraint
-        elif j==1:
-            #y0[:-1] = yk
-            yk = spo.minimize(func,y0,tol=eps,
-                              constraints=[],
-                              method='trust-constr',
-                              options={'gtol': eps,
-                                       'xtol': eps,
-                                       'barrier_tol': eps}).x
-            #For all other iterations add both constraints
-        else:
-            #y0[:-1] = yk
-            yk = spo.minimize(func,y0,tol=eps,
-                              constraints=[],
-                              method='trust-constr',
-                              options={'gtol': eps,
-                                       'xtol': eps,
-                                       'barrier_tol': eps}).x
+                                       'barrier_tol': eps,}).x
+        #     #Second iteration add mass constraint
+        # elif j==1:
+        #     y0[:-1] = yk
+        #     yk = spo.minimize(func,y0,tol=eps,
+        #                       constraints=[],
+        #                       method='trust-constr',
+        #                       options={'gtol': eps,
+        #                                'xtol': eps,
+        #                                'barrier_tol': eps}).x
+        #     #For all other iterations add both constraints
+        # else:
+        #     y0[:-1] = yk
+        #     yk = spo.minimize(func,y0,tol=eps,
+        #                       constraints=[],
+        #                       method='trust-constr',
+        #                       options={'gtol': eps,
+        #                                'xtol': eps,
+        #                                'barrier_tol': eps}).x
         
         x.append(pre @ Q @ yk + x0)
 
