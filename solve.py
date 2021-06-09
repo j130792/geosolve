@@ -80,7 +80,7 @@ if __name__=="__main__":
 
     params, prob = lkdv.linforms()
 
-    k = 8
+    k = 7
     
     x, solvedict = gmres(params['A'],
               params['b'],
