@@ -80,11 +80,9 @@ def gmres_e(A, b, x0, k,
         tol=1e-15
         #Initialise guess
         y0 = np.zeros((j+1,))
-        if j==0:
-            yk = y0
-        y0[:-1] = yk
+
         #For the first iteration just use gmres
-        if 1>0:#j==0:
+        if j==0:
             solve = spo.minimize(func,y0,tol=tol,
                               method='SLSQP',
                               options={'maxiter': 1e3,
@@ -95,27 +93,38 @@ def gmres_e(A, b, x0, k,
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
-                
             yk = solve.x
 
-        #     #Second iteration add mass constraint
-        # elif j==1:
-        #     y0[:-1] = yk
-        #     yk = spo.minimize(func,y0,tol=eps,
-        #                       constraints=[],
-        #                       method='trust-constr',
-        #                       options={'gtol': eps,
-        #                                'xtol': eps,
-        #                                'barrier_tol': eps}).x
-        #     #For all other iterations add both constraints
-        # else:
-        #     y0[:-1] = yk
-        #     yk = spo.minimize(func,y0,tol=eps,
-        #                       constraints=[],
-        #                       method='trust-constr',
-        #                       options={'gtol': eps,
-        #                                'xtol': eps,
-        #                                'barrier_tol': eps}).x
+            #Second iteration add mass constraint
+        elif j==1:
+            y0[:-1] = yk
+            solve = spo.minimize(func,y0,tol=tol,
+                                 constraints=[con1],
+                                 method='SLSQP',
+                                 options={'maxiter': 1e3,
+                                       'eps': 1e-13,
+                                       'iprint': 0,
+                                       'ftol': 1e-50,
+                                       'disp': True})
+            if solve.message!='Optimization terminated successfully':
+                warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
+                              RuntimeWarning)
+            yk = solve.x
+            #For all other iterations add both constraints
+        else:
+            y0[:-1] = yk
+            solve = spo.minimize(func,y0,tol=tol,
+                                 constraints=[con1,con2],
+                                 method='SLSQP',
+                                 options={'maxiter': 1e3,
+                                          'eps': 1e-13,
+                                          'iprint': 0,
+                                          'ftol': 1e-50,
+                                          'disp': True})
+            if solve.message!='Optimization terminated successfully':
+                warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
+                              RuntimeWarning)
+            yk = solve.x
         
         x.append(pre @ Q @ yk + x0)
 
