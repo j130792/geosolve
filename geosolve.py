@@ -93,6 +93,7 @@ def gmres_e(A, b, x0, k,
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
+            print(solve)
             yk = solve.x
 
             #Second iteration add mass constraint
@@ -109,11 +110,12 @@ def gmres_e(A, b, x0, k,
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
+            print(solve)
             yk = solve.x
             #For all other iterations add both constraints
         else:
             y0[:-1] = yk
-            solve = spo.minimize(func,y0,tol=tol,
+            solve = spo.minimize(func,y0,tol=tol,jac='3-point',
                                  constraints=[con1,con2],
                                  method='SLSQP',
                                  options={'maxiter': 1e3,
@@ -124,6 +126,7 @@ def gmres_e(A, b, x0, k,
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
+            print(solve)
             yk = solve.x
         
         x.append(pre @ Q @ yk + x0)
