@@ -18,6 +18,10 @@ output/*
 *.msh
 *.opt
 *.txt
-*.csv
-*.tex
-*/*
+code/*.csv
+code/*.tex
+*.aux
+*.bbl
+*.blg
+*.out
+*.pdfsync
