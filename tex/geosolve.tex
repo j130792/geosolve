@@ -1,0 +1,173 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Hey Emacs,
+%% mode:latex ***
+%% tex-main-file: "invariant.tex"  ***
+%%
+%%
+%%
+%% James Jackaman (1)
+%%
+%%  (1) jjackaman@mun.ca
+%%
+%% Dear Human:
+%%
+%% This source file may be subject to copyright restrictions as
+%% mandated by the Journal's policy and arXiv's copyright policies.
+%%
+%% In any case, you MUST SEEK PERMISSION from at least one of the
+%% authors prior to any use of this source file.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[final,reqno]{amsart}
+\usepackage{pdfsync}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage{xspace}
+\usepackage{array}
+\usepackage{tabularx}
+%\usepackage{tabulary}
+\usepackage{subfigure}
+\usepackage{caption}
+\usepackage{fullpage}
+\usepackage{cite}
+\usepackage{caption}
+\usepackage{james}
+
+\hypersetup{colorlinks, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+% Commenting macros
+\newcommand{\james}[1]{ {\color{magenta}[ J: #1 ]} }
+\newcommand{\francis}[1]{ {\color{red}[ F: #1 ]} }
+\newcommand{\alex}[1]{ {\color{green}[ A: #1 ]} }
+
+%remove unneeded equation references
+\usepackage{mathtools}
+\mathtoolsset{showonlyrefs=true}
+
+
+\setlength{\parindent}{12pt} %to have no indentation in the beginning
+                            %of paragraph
+
+\author{
+  James Jackaman
+}
+\address{
+  James Jackaman
+  \thanks{
+    Department of Mathematics and Statistics, Memorial University of
+    Newfoundland, St.\ John's, NL, A1C 5S7, Canada
+    {\tt{jjackaman@mun.ca}}.
+  }}
+
+\author{Scott MacLachlan}
+\address{
+  Scott MacLachlan
+  \thanks{
+    Department of Mathematics and Statistics, Memorial University of
+    Newfoundland, St.\ John's, NL, A1C 5S7, Canada
+    {\tt{smaclachlan@mun.ca}}.
+  }}
+
+\thanks{This research was supported by people who gave us money for stuff.}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\title[]%
+{Geometrically constrained linear solvers}
+\date{\today}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\pdfformat{true}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+\begin{abstract}
+
+  In this paper we do some stuff for some reasons.
+ 
+\end{abstract}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction} \label{sec:introduction}
+
+This comes last.
+
+
+
+
+%   \begin{table}[h] \parbox{.45\linewidth}{%
+% \captionsetup{width=\linewidth}
+% \caption{The standard finite element approximation
+%   \eqref{eqn:painlevefe} where \eqref{eqn:num:ex21} and
+%   \eqref{eqn:num:ex22} hold with $T=10$. %We observe optimal %
+%   convergence in each polynomial degree.
+%   \label{tab:ex20}} \input{tables/example2invariant0.tex} }
+% \hfill \parbox{.45\linewidth}{% \captionsetup{width=\linewidth}
+%   \caption{The invariant finite element approximation
+%     \eqref{eqn:painleve:invariant} where \eqref{eqn:num:ex21} and
+%     \eqref{eqn:num:ex22} hold with $T=10$. %We observe optimal %
+%     convergence in each polynomial degree, and that for all % simulations
+%     the approximation is exact at the end time.
+%     \label{tab:ex21}} \input{tables/example2invariant1.tex} }
+% \end{table}
+
+
+\section{Methodology/ideas}
+
+
+
+\section{Linear KdV}
+
+The linear KdV equation is described by
+\begin{equation}
+  u_t + \frac12 u_x  + u_{xxx} = 0
+  ,
+\end{equation}
+and has several non-trivial invariants. For the sake of exposition we
+shall focus on two of these invariants, namely mass
+\begin{equation}
+  \ddt \int_\Omega u \di{x} = 0
+\end{equation}
+and energy
+\begin{equation}
+  \ddt \int_\Omega \frac12 u_x^2 - \frac12 u^2 \di{x} = 0
+  .
+\end{equation}
+
+
+\subsection{Tabulation of results}
+
+
+
+
+
+
+\section{Conclusion}
+
+The introduction written in past tense.
+  
+
+
+\FloatBarrier
+\bibliographystyle{abbrv}
+\bibliography{geosolve}
+\nocite{*}
+
+\end{document}
+
+% LocalWords:  tt th eqn prolongated sys ODEs Galerkin Bihlo NL AVF
+% LocalWords:  invariantisation invariance equivariant isotropy ttt
+% LocalWords:  foliation discretisation ty Valiquette Runge Kutta
+% LocalWords:  equivariance movingframe invariantising bt groupoid
+% LocalWords:  glode Painlev priori painleve painlevefe notational
+% LocalWords:  fe vnl mlbf vectorial EOC linearised glodefe Sturm
+% LocalWords:  iteratively invariantised discretisations symplectic
+% LocalWords:  differentiable integrators meshless PDEs submanifolds
+% LocalWords:  noproject invariantise projectable mfK submanifold
+% LocalWords:  approximability Mathematica functionals ax sym
+% LocalWords:  painlevemf normalisations lagrangebasis Liouville
+% LocalWords:  ay eq Schwarzian Firedrake NumPy linalg linearisation
