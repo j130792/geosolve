@@ -7,9 +7,9 @@ import matplotlib.pylab as plt
 import refd
 
 class problem(object):
-    def __init__(self,N,M):
+    def __init__(self,N,M,degree):
         self.mlength = 40
-        self.degree = 1
+        self.degree = degree
         self.N = N
         self.M = M
 
@@ -30,9 +30,9 @@ class problem(object):
         u = sin(beta*(x-(1-beta**2)*t)) + 1
         return u
 
-def linforms(N=100,M=50,T=1):
+def linforms(N=100,M=50,degree=1,T=1):
     #set up problem class
-    prob = problem(N=N,M=M)
+    prob = problem(N=N,M=M,degree=degree)
     #Set up finite element stuff
     mesh = prob.mesh()
     Z = prob.function_space(mesh)
