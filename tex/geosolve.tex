@@ -25,6 +25,7 @@
 \usepackage{xspace}
 \usepackage{array}
 \usepackage{tabularx}
+\usepackage{booktabs}
 %\usepackage{tabulary}
 \usepackage{subfigure}
 \usepackage{caption}
@@ -99,23 +100,6 @@ This comes last.
 
 
 
-%   \begin{table}[h] \parbox{.45\linewidth}{%
-% \captionsetup{width=\linewidth}
-% \caption{The standard finite element approximation
-%   \eqref{eqn:painlevefe} where \eqref{eqn:num:ex21} and
-%   \eqref{eqn:num:ex22} hold with $T=10$. %We observe optimal %
-%   convergence in each polynomial degree.
-%   \label{tab:ex20}} \input{tables/example2invariant0.tex} }
-% \hfill \parbox{.45\linewidth}{% \captionsetup{width=\linewidth}
-%   \caption{The invariant finite element approximation
-%     \eqref{eqn:painleve:invariant} where \eqref{eqn:num:ex21} and
-%     \eqref{eqn:num:ex22} hold with $T=10$. %We observe optimal %
-%     convergence in each polynomial degree, and that for all % simulations
-%     the approximation is exact at the end time.
-%     \label{tab:ex21}} \input{tables/example2invariant1.tex} }
-% \end{table}
-
-
 \section{Methodology/ideas}
 
 
@@ -141,9 +125,42 @@ and energy
 
 \subsection{Tabulation of results}
 
+\begin{table}[h]
+  \captionsetup{width=\linewidth}
 
+  \tiny{
+    \caption{$N=100$, $M=50$, $p=1$.} \input{tables/N100M50degree1.tex}
+    }
+\end{table}
 
+\begin{table}[h]
+  \captionsetup{width=\linewidth}
+  \tiny{
+    \caption{$N=100$, $M=49$, $p=1$.} \input{tables/N100M49degree1.tex}
+    }
+\end{table}
 
+\begin{table}[h]
+  \captionsetup{width=\linewidth}
+  \tiny{
+    \caption{$N=100$, $M=25$, $p=1$.} \input{tables/N100M25degree1.tex}
+    }
+\end{table}
+
+\begin{table}[h]
+  \captionsetup{width=\linewidth}
+  \tiny{
+    \caption{$N=2$, $M=20$, $p=1$.} \input{tables/N2M20degree1.tex}
+    }
+\end{table}
+
+\begin{table}[h]
+  \captionsetup{width=\linewidth}
+  \tiny{
+  \caption{$N=1000$, $M=500$, $p=1$.}
+  \input{tables/N1000M500degree1.tex}
+  }
+\end{table}
 
 
 \section{Conclusion}
