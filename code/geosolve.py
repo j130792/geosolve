@@ -59,6 +59,46 @@ def gmres_e(A, b, x0, k,
             out = np.inner(F,F)
             return out
 
+        def jac(z):
+            out = np.zeros_like(z)
+            # #original term
+            # F = r - A @ Q @ z
+            # #Component wise differentiation of F
+            # for j in range(len(z)):
+            #     ej = np.zeros_like(z)
+            #     ej[j] = 1 
+            #     dF = - A @ Q @ ej
+
+            #     #assemble j-th component of jac
+            #     out[j] = 2 * np.inner(dF,F)
+
+            #original term
+            F = res - h[:j+2,:j+1] @ z
+            #Component wise differentiation of F
+            for m in range(len(z)):
+                ej = np.zeros_like(z)
+                ej[m] = 1 
+                dF = - h[:j+2,:j+1] @ ej
+
+                #assemble j-th component of jac
+                out[m] = 2 * np.inner(dF,F)
+                
+            return out
+
+        def hess(z):
+            dim = len(z)
+            out = np.zeros((dim,dim))
+            for n in range(dim):
+                for m in range(dim):
+                    e1 = np.zeros_like(z)
+                    e1[n] = 1
+                    e2 = np.zeros_like(z)
+                    e2[m] = 1
+                    #assemble n,m-th component of hessian
+                    out[n,m] = 2 * np.inner( h[:j+2,:j+1] @ e1, h[:j+2,:j+1] @ e2)
+
+            return out
+        
         #Add first constraint
         def const1(z):
             X = x0 + Q @ z
@@ -80,6 +120,15 @@ def gmres_e(A, b, x0, k,
         tol=1e-15
         #Initialise guess
         y0 = np.zeros((j+1,))
+
+        # print('r', r.shape)
+        # print('A', A.shape)
+        # print('Q', Q.shape)
+        # print('y0', y0.shape)
+
+        # print(jac(y0))
+        
+        # input('p')
 
         #For the first iteration just use gmres
         if j==0:
@@ -115,14 +164,14 @@ def gmres_e(A, b, x0, k,
             #For all other iterations add both constraints
         else:
             y0[:-1] = yk
-            solve = spo.minimize(func,y0,tol=tol,jac='3-point',
+            solve = spo.minimize(func,y0,tol=tol,jac=jac, hess=hess,
                                  constraints=[con1,con2],
-                                 method='SLSQP',
-                                 options={'maxiter': 1e3,
-                                          'eps': 1e-13,
-                                          'iprint': 0,
-                                          'ftol': 1e-50,
-                                          'disp': True})
+                                 method='trust-constr')
+                                 # options={'maxiter': 1e3,
+                                 #          'eps': 1e-13,
+                                 #          'iprint': 0,
+                                 #          'ftol': 1e-50,
+                                 #          'disp': True})
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
