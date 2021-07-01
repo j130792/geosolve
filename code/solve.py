@@ -1,9 +1,12 @@
 #global
 from firedrake import *
-import numpy as np
+#import numpy as np
+import autograd.numpy as np
+from autograd import jacobian
 import scipy.sparse.linalg as spsla
 import matplotlib.pylab as plt
 import pyamg.krylov as pak
+import scipy.sparse as sps
 #local
 import lkdv
 import refd
@@ -80,7 +83,7 @@ if __name__=="__main__":
 
     params, prob = lkdv.linforms()
 
-    k = 10
+    k = 30
     
     x, solvedict = gmres(params['A'],
               params['b'],
@@ -95,15 +98,22 @@ if __name__=="__main__":
                        e0 = params['e0'])
                              
 
-    # x_pak, _ = pak.gmres(params['A'],
-    #                      params['b'],
-    #                      x0=np.zeros_like(params['b']),
-    #                      maxiter=k,
-    #                      tol= 1e-10,
-    #                      orthog='mgs')
+    x_pak, _ = pak.gmres(params['A'],
+                         params['b'],
+                         x0=np.zeros_like(params['b']),
+                         maxiter=k,
+                         tol= 1e-10,
+                         orthog='mgs')
 
 
     print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])/x[-1]))
+    print('gmres error on standard =', np.max(np.abs(x_pak-x[-1])/x[-1]))
+
+    #compute invariants for pyamg solve
+    invamg = lkdv.compute_invariants(prob,x_pak)
+    print('pyamg mass deviation =', invamg['mass']-params['m0'])
+    print('pyamg energy deviation =', invamg['energy']-params['e0'])
+
     input('pause')
 
     vis.tabulator(params,prob,[solvedict,geodict])
