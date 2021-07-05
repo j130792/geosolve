@@ -16,7 +16,7 @@ def nptofd(prob,vec):
     vec1, vec2 = np.split(vec, 2)
 
     #Set up spaces
-    m = prob.mesh()
+    m = prob.mesh
     Z = prob.function_space(m)
 
     z = Function(Z)
@@ -24,5 +24,23 @@ def nptofd(prob,vec):
     #Copy in external data
     u.dat.data[:] = vec1[:]
     v.dat.data[:] = vec2[:]
+
+    return z
+
+def nptofd3(prob,vec):
+
+    #seperate vector components
+    vec1, vec2, vec3 = np.split(vec, 3)
+
+    #Set up spaces
+    m = prob.mesh
+    Z = prob.function_space(m)
+
+    z = Function(Z)
+    u, v, w = z.split()
+    #Copy in external data
+    u.dat.data[:] = vec1[:]
+    v.dat.data[:] = vec2[:]
+    w.dat.data[:] = vec3[:]
 
     return z

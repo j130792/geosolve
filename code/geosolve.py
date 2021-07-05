@@ -137,12 +137,11 @@ def gmres_e(A, b, x0, k,
                               options={'maxiter': 1e3,
                                        'eps': 1e-13,
                                        'iprint': 0,
-                                       'ftol': 1e-50,
-                                       'disp': True})
+                                       'ftol': 1e-50})
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
-            print(solve)
+            #print(solve)
             yk = solve.x
 
             #Second iteration add mass constraint
@@ -154,19 +153,22 @@ def gmres_e(A, b, x0, k,
                                  options={'maxiter': 1e3,
                                        'eps': 1e-13,
                                        'iprint': 0,
-                                       'ftol': 1e-50,
-                                       'disp': True})
+                                       'ftol': 1e-50})
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
-            print(solve)
+            #print(solve)
             yk = solve.x
             #For all other iterations add both constraints
         else:
             y0[:-1] = yk
-            solve = spo.minimize(func,y0,tol=tol,jac=jac, hess=hess,
+            solve = spo.minimize(func,y0,tol=tol,jac=jac,hess=hess,
                                  constraints=[con1,con2],
-                                 method='trust-constr')
+                                 method='trust-constr',
+                                 options={'xtol': 1e-25,
+                                          'gtol': 1e-12,
+                                          'barrier_tol': 1e-12,
+                                          'maxiter': 1e3})
                                  # options={'maxiter': 1e3,
                                  #          'eps': 1e-13,
                                  #          'iprint': 0,
@@ -175,7 +177,7 @@ def gmres_e(A, b, x0, k,
             if solve.message!='Optimization terminated successfully':
                 warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
                               RuntimeWarning)
-            print(solve)
+            #print(solve)
             yk = solve.x
         
         x.append(pre @ Q @ yk + x0)

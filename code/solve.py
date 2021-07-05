@@ -1,8 +1,7 @@
 #global
 from firedrake import *
-#import numpy as np
-import autograd.numpy as np
-from autograd import jacobian
+import numpy as np
+import numpy.linalg as npl
 import scipy.sparse.linalg as spsla
 import matplotlib.pylab as plt
 import pyamg.krylov as pak
@@ -81,21 +80,21 @@ def gmres(A, b, x0, k, M = None):
 
 if __name__=="__main__":
 
-    params, prob = lkdv.linforms()
+    params, prob = lkdv.linforms(space='CG',degree=2)
 
     k = 30
     
     x, solvedict = gmres(params['A'],
-              params['b'],
-              x0=np.zeros_like(params['b']),
-              k=k)
+                         params['b'],
+                         x0=np.zeros_like(params['b']),
+                         k=k)
 
     x_con, geodict = gs.gmres_e(A = params['A'], b = params['b'],
-                       x0=np.zeros_like(params['b']),
-                       k=k,
-                       M = params['M'], L = params['L'],
-                       omega = params['omega'], m0 = params['m0'],
-                       e0 = params['e0'])
+                                x0=np.zeros_like(params['b']),
+                                k=k,
+                                M = params['M'], L = params['L'],
+                                omega = params['omega'], m0 = params['m0'],
+                                e0 = params['e0'])
                              
 
     x_pak, _ = pak.gmres(params['A'],
@@ -104,6 +103,8 @@ if __name__=="__main__":
                          maxiter=k,
                          tol= 1e-10,
                          orthog='mgs')
+
+    x_dir = spsla.spsolve(params['A'],params['b'])
 
 
     print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])/x[-1]))
@@ -114,6 +115,11 @@ if __name__=="__main__":
     print('pyamg mass deviation =', invamg['mass']-params['m0'])
     print('pyamg energy deviation =', invamg['energy']-params['e0'])
 
+    #compute invariants for direct solve
+    invdir = lkdv.compute_invariants(prob,x_dir)
+    print('direct solver mass deviation =', invdir['mass']-params['m0'])
+    print('direct solver energy deviation =', invdir['energy']-params['e0'])
+    
     input('pause')
 
     vis.tabulator(params,prob,[solvedict,geodict])
