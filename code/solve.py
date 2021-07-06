@@ -90,12 +90,9 @@ if __name__=="__main__":
                          x0=np.zeros_like(params['b']),
                          k=k)
 
-    x_con, geodict = gs.gmres_e(A = params['A'], b = params['b'],
+    x_con, geodict = gs.gmres_e(params,
                                 x0=np.zeros_like(params['b']),
-                                k=k,
-                                M = params['M'], L = params['L'],
-                                omega = params['omega'], m0 = params['m0'],
-                                mo0 = params['mo0'], e0 = params['e0'])
+                                k=k)
                              
 
     x_pak, _ = pak.gmres(params['A'],

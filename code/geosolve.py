@@ -7,10 +7,19 @@ import matplotlib.pylab as plt
 import scipy.optimize as spo
 import warnings
 
-def gmres_e(A, b, x0, k,
-            M, L, omega, m0, mo0, e0,
+def gmres_e(dic,x0, k,
             pre = None):
 
+    A = dic['A']
+    b = dic['b']
+    M = dic['M']
+    L = dic['L']
+    omega = dic['omega']
+    m0 = dic['m0']
+    mo0 = dic['mo0']
+    e0 = dic['e0']
+    
+    
     #If not using preconditioner, set up identity as placeholder
     if pre is None:
         pre = np.identity(np.size(A[0,:]))
