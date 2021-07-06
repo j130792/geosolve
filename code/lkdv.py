@@ -15,9 +15,6 @@ class problem(object):
         self.space = space
         self.mesh = PeriodicIntervalMesh(self.M,self.mlength)
 
-    # def mesh(self):
-    #     return PeriodicIntervalMesh(self.M,self.mlength)
-
     def function_space(self,mesh):
         U = FunctionSpace(mesh,self.space,self.degree)
         return MixedFunctionSpace((U,U))
@@ -31,6 +28,7 @@ class problem(object):
         beta = alpha*period
         u = sin(beta*(x-(1-beta**2)*t)) + 1
         return u
+        
 
 def linforms(N=100,M=50,degree=1,T=1,space='CG'):
     #set up problem class
@@ -65,7 +63,6 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
 
     #Define timestep
     dt = float(T)/N
-
     
     #Build weak form
     phi, psi = TestFunctions(Z)
@@ -101,6 +98,7 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
 
     #Get the initial values for the invariants
     m0 = assemble(u0*dx)
+    mo0 = assemble(u0*u0*dx)
     e0 = assemble(0.5*bilin(u0,u0) + ( - 0.5 * u0**2)*dx)
 
     #Generate x vector
@@ -119,6 +117,7 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
         'L': L,
         'omega': omega,
         'm0': m0,
+        'mo0': mo0,
         'e0': e0,
     }
         

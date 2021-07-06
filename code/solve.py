@@ -113,11 +113,13 @@ if __name__=="__main__":
     #compute invariants for pyamg solve
     invamg = lkdv.compute_invariants(prob,x_pak)
     print('pyamg mass deviation =', invamg['mass']-params['m0'])
+    print('pyamg momentum deviation =', invamg['momentum']-params['mo0'])
     print('pyamg energy deviation =', invamg['energy']-params['e0'])
 
     #compute invariants for direct solve
     invdir = lkdv.compute_invariants(prob,x_dir)
     print('direct solver mass deviation =', invdir['mass']-params['m0'])
+    print('direct solver momentum deviation =', invdir['momentum']-params['mo0'])
     print('direct solver energy deviation =', invdir['energy']-params['e0'])
     
     input('pause')
