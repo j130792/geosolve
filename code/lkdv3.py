@@ -7,18 +7,17 @@ import matplotlib.pylab as plt
 import refd
 
 class problem(object):
-    def __init__(self,N,M,space,degree):
+    def __init__(self,N,M,degree):
         self.mlength = 40
         self.degree = degree
-        self.dim = 2
+        self.dim = 3 #Save the dimension of the problem
         self.N = N
         self.M = M
-        self.space = space
         self.mesh = PeriodicIntervalMesh(self.M,self.mlength)
 
     def function_space(self,mesh):
-        U = FunctionSpace(mesh,self.space,self.degree)
-        return MixedFunctionSpace((U,U))
+        U = FunctionSpace(mesh,'DG',self.degree)
+        return MixedFunctionSpace((U,U,U))
 
     def exact(self,x,t):
         """
@@ -31,9 +30,9 @@ class problem(object):
         return u
         
 
-def linforms(N=100,M=50,degree=1,T=1,space='CG'):
+def linforms(N=100,M=50,degree=1,T=1):
     #set up problem class
-    prob = problem(N=N,M=M,space=space,degree=degree)
+    prob = problem(N=N,M=M,degree=degree)
     #Set up finite element stuff
     mesh = prob.mesh
     Z = prob.function_space(mesh)
@@ -53,35 +52,47 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
     def gfunc(uh,vh):
         g = uh.dx(0)*vh*dx - jump(uh,n[0])*avg(vh)*dS 
         return g
+
+    def gfuncproject(u,space):
+        p_func = Function(space)
+        p_test = TestFunction(space)
+        p_form = p_func*p_test*dx - gfunc(u,p_test)
+        solve(p_form==0,p_func,
+          solver_parameters={'ksp_type': 'preonly',
+                             'pc_type': 'lu'})
+        return p_func
     
     #Set up initial conditions
     z0 = Function(Z)
-    u0,v0 = z0.split()
+    u0,v0,w0 = z0.split()
 
     t = 0.
     x = SpatialCoordinate(Z.mesh())
     u0.assign(project(prob.exact(x[0],t),Z.sub(0)))
+    w0.assign(gfuncproject(u0,Z.sub(2)))
 
     #Define timestep
     dt = float(T)/N
     
     #Build weak form
-    phi, psi = TestFunctions(Z)
+    phi, psi, chi = TestFunctions(Z)
     z1 = Function(Z)
     z_trial = TrialFunction(Z)
-    u_trial, v_trial = split(z_trial)
+    u_trial, v_trial, w_trial = split(z_trial)
     z1.assign(z0)
 
-    #u1, v1 = split(z1)
-    u0, v0 = split(z0)
+    u0, v0, w0 = split(z0)
 
     ut = (u_trial - u0) / dt
     umid = 0.5 * (u_trial + u0)
+    wmid = 0.5 * (w_trial + w0)
 
     F1 = (ut) * phi * dx + gfunc(v_trial,phi)
     F2 = (v_trial - umid) * psi * dx \
-        + bilin(umid,psi)
-    F = F1 + F2
+        - gfunc(wmid, psi)
+    F3 = w_trial*chi*dx - gfunc(u_trial,chi)
+    
+    F = F1 + F2 + F3
 
     
     #Read out A and b
@@ -92,20 +103,21 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
     M_form = u_trial * phi * dx
     M = assemble(lhs(M_form),mat_type='aij').M.values
     #And for L
-    L_form = bilin(u_trial, phi)
+    L_form = w_trial * chi * dx
     L = assemble(lhs(L_form),mat_type='aij').M.values
     #And the vector needed for finding the mass
     omega = np.asarray(assemble(phi * dx).dat.data).reshape(-1)
 
     #Get the initial values for the invariants
     m0 = assemble(u0*dx)
-    mo0 = assemble(u0*u0*dx)
-    e0 = assemble(0.5*bilin(u0,u0) + ( - 0.5 * u0**2)*dx)
+    mo0 = assemble(0.5*u0**2*dx)
+    e0 = assemble((0.5 * w0**2 - 0.5 * u0**2)*dx)
 
     #Generate x vector
-    u0, v0 = z0.split()
+    u0, v0, w0 = z0.split()
     u0.assign(interpolate(x[0],Z.sub(0)))
     v0.assign(interpolate(x[0],Z.sub(0)))
+    w0.assign(interpolate(x[0],Z.sub(0)))
     x_vec = np.asarray(assemble(z0).dat.data).reshape(-1)
 
 
@@ -127,23 +139,11 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
 
 def compute_invariants(prob,uvec):
 
-    #set up DG stuff
-    n = FacetNormal(prob.mesh)
-    h = prob.mlength/prob.M
-    sigma = 10/h
-    #including some definitions
-    def bilin(uh,vh):
-        a = uh.dx(0)*vh.dx(0)*dx
-        b = - (jump(uh,n[0])*avg(vh.dx(0)) 
-               +jump(vh,n[0])*avg(uh.dx(0)) ) *dS
-        d = (sigma) * jump(uh,n[0])*jump(vh,n[0]) *dS
-        return a + b + d
-    
-    z = refd.nptofd(prob,uvec)
-    u,v = z.split()
+    z = refd.nptofd3(prob,uvec)
+    u,v, w = z.split()
     mass = assemble(u*dx)
-    momentum = assemble(u**2*dx)
-    energy = assemble(0.5 * bilin(u,u) - ( 0.5 * u**2)*dx)
+    momentum = assemble(0.5*u**2*dx)
+    energy = assemble((0.5*w**2 - 0.5 * u**2)*dx)
 
     inv_dict = {'mass' : mass,
                 'momentum' : momentum,

@@ -8,6 +8,7 @@ import pyamg.krylov as pak
 import scipy.sparse as sps
 #local
 import lkdv
+import lkdv3
 import refd
 import geosolve as gs
 import visualise as vis
@@ -80,7 +81,7 @@ def gmres(A, b, x0, k, M = None):
 
 if __name__=="__main__":
 
-    params, prob = lkdv.linforms(space='CG',degree=2)
+    params, prob = lkdv3.linforms(degree=1)
 
     k = 30
     
@@ -94,7 +95,7 @@ if __name__=="__main__":
                                 k=k,
                                 M = params['M'], L = params['L'],
                                 omega = params['omega'], m0 = params['m0'],
-                                e0 = params['e0'])
+                                mo0 = params['mo0'], e0 = params['e0'])
                              
 
     x_pak, _ = pak.gmres(params['A'],
@@ -111,21 +112,28 @@ if __name__=="__main__":
     print('gmres error on standard =', np.max(np.abs(x_pak-x[-1])/x[-1]))
 
     #compute invariants for pyamg solve
-    invamg = lkdv.compute_invariants(prob,x_pak)
+    if prob.dim==2:
+        compute_invariants = lkdv.compute_invariants
+    else:
+        compute_invariants = lkdv3.compute_invariants
+    invamg = compute_invariants(prob,x_pak)
     print('pyamg mass deviation =', invamg['mass']-params['m0'])
     print('pyamg momentum deviation =', invamg['momentum']-params['mo0'])
     print('pyamg energy deviation =', invamg['energy']-params['e0'])
 
     #compute invariants for direct solve
-    invdir = lkdv.compute_invariants(prob,x_dir)
+    invdir = compute_invariants(prob,x_dir)
     print('direct solver mass deviation =', invdir['mass']-params['m0'])
     print('direct solver momentum deviation =', invdir['momentum']-params['mo0'])
     print('direct solver energy deviation =', invdir['energy']-params['e0'])
     
     input('pause')
 
-    vis.tabulator(params,prob,[solvedict,geodict])
-    
+    if prob.dim==2:
+        vis.tabulator(params,prob,[solvedict,geodict])
+    else:
+        vis.tabulator3(params,prob, [solvedict, geodict])
+        
     # input('pause before plots')
     
     # #plot some solutions

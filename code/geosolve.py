@@ -8,7 +8,7 @@ import scipy.optimize as spo
 import warnings
 
 def gmres_e(A, b, x0, k,
-            M, L, omega, m0, e0,
+            M, L, omega, m0, mo0, e0,
             pre = None):
 
     #If not using preconditioner, set up identity as placeholder
@@ -99,7 +99,7 @@ def gmres_e(A, b, x0, k,
 
             return out
         
-        #Add first constraint
+        #Add mass constraint
         def const1(z):
             X = x0 + Q @ z
             out = np.transpose(omega) @ X - m0
@@ -107,15 +107,23 @@ def gmres_e(A, b, x0, k,
         con1 = {"type": "eq",
                 "fun": const1}
 
-        #second constraint
+        #momentum constraint
         def const2(z):
+            X = x0 + Q @ z
+            out = 0.5*np.transpose(X) @ M @ X - mo0
+            return out
+        con2 = {"type": "eq",
+                "fun": const2}
+        
+        #energy constraint
+        def const3(z):
             X = x0 + Q @ z
             out = 0.5 * np.transpose(X) @ L @ X \
                 - 0.5 * np.transpose(X) @ M @ X \
                 - e0
             return out
-        con2 = {"type": "eq",
-                "fun": const2}
+        con3 = {"type": "eq",
+                "fun": const3}
 
         tol=1e-15
         #Initialise guess
@@ -159,11 +167,26 @@ def gmres_e(A, b, x0, k,
                               RuntimeWarning)
             #print(solve)
             yk = solve.x
+            #Third iteration add momentum constraint
+        elif j==2:
+            y0[:-1] = yk
+            solve = spo.minimize(func,y0,tol=tol,
+                                 constraints=[con1,con3],
+                                 method='SLSQP',
+                                 options={'maxiter': 1e3,
+                                       'eps': 1e-13,
+                                       'iprint': 0,
+                                       'ftol': 1e-50})
+            if solve.message!='Optimization terminated successfully':
+                warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
+                              RuntimeWarning)
+            #print(solve)
+            yk = solve.x
             #For all other iterations add both constraints
         else:
             y0[:-1] = yk
             solve = spo.minimize(func,y0,tol=tol,jac=jac,hess=hess,
-                                 constraints=[con1,con2],
+                                 constraints=[con1,con2,con3],
                                  method='trust-constr',
                                  options={'xtol': 1e-25,
                                           'gtol': 1e-12,
