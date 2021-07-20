@@ -31,7 +31,7 @@ class problem(object):
         return u
         
 
-def linforms(N=100,M=50,degree=1,T=1,space='CG'):
+def linforms(N=100,M=50,degree=1,T=10,space='CG',zinit=None):
     #set up problem class
     prob = problem(N=N,M=M,space=space,degree=degree)
     #Set up finite element stuff
@@ -60,7 +60,10 @@ def linforms(N=100,M=50,degree=1,T=1,space='CG'):
 
     t = 0.
     x = SpatialCoordinate(Z.mesh())
-    u0.assign(project(prob.exact(x[0],t),Z.sub(0)))
+    if zinit==None:
+        u0.assign(project(prob.exact(x[0],t),Z.sub(0)))
+    else:
+        u0.assign(zinit.sub(0))
 
     #Define timestep
     dt = float(T)/N

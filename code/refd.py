@@ -27,6 +27,7 @@ def nptofd(prob,vec):
 
     return z
 
+
 def nptofd3(prob,vec):
 
     #seperate vector components
@@ -44,3 +45,16 @@ def nptofd3(prob,vec):
     w.dat.data[:] = vec3[:]
 
     return z
+
+
+#Flatten Firedrake vectors
+def flatten(vec):
+    dim = len(vec)
+    size = len(vec[0])
+    newvec = np.zeros((size*dim,))
+
+    for i in range(dim):
+        newvec[i*size:size*(i+1)] = vec[i]
+
+
+    return newvec

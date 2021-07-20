@@ -76,7 +76,7 @@ def gmres(A, b, x0, k, M = None):
             'x':x,
             'res':residual}
 
-    return x, dict
+    return x[-1], dict
 
 
 if __name__=="__main__":
@@ -110,8 +110,8 @@ if __name__=="__main__":
     x_dir = spsla.spsolve(params['A'],params['b'])
 
 
-    print('gmres error on conservation =', np.max(np.abs(x_con[-1]-x[-1])/x[-1]))
-    print('gmres error on standard =', np.max(np.abs(x_pak-x[-1])/x[-1]))
+    print('gmres error on conservation =', np.max(np.abs(x_con-x)/x))
+    print('gmres error on standard =', np.max(np.abs(x_pak-x)/x))
 
     #compute invariants for pyamg solve
     if prob.dim==2:

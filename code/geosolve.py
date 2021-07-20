@@ -11,7 +11,9 @@ def gmres_e(A, b ,x0, k,
             conlist=[],
             pre = None):
 
-  
+    #Set tolerance
+    tol=1e-15
+    
     #If not using preconditioner, set up identity as placeholder
     if pre is None:
         pre = np.identity(np.size(A[0,:]))
@@ -132,5 +134,5 @@ def gmres_e(A, b ,x0, k,
             'x': x,
             'res': residual}
 
-    return x, dict
+    return x[-1], dict
 
