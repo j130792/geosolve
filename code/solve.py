@@ -10,7 +10,7 @@ import scipy.sparse as sps
 import lkdv
 import lkdv3
 import refd
-import geosolve as gs
+from kdvsolve import kdvsolve, kdvsolve3
 import visualise as vis
 
 
@@ -81,18 +81,23 @@ def gmres(A, b, x0, k, M = None):
 
 if __name__=="__main__":
 
-    params, prob = lkdv3.linforms(degree=1)
+    params, prob = lkdv.linforms(degree=1)
 
-    k = 30
+    k = 20
     
     x, solvedict = gmres(params['A'],
                          params['b'],
                          x0=np.zeros_like(params['b']),
                          k=k)
 
-    x_con, geodict = gs.gmres_e(params,
-                                x0=np.zeros_like(params['b']),
-                                k=k)
+    if prob.dim==2:
+        ksolve = kdvsolve
+    else:
+        ksolve = kdvsolve3
+        
+    x_con, geodict = ksolve(params,
+                              x0=np.zeros_like(params['b']),
+                              k=k)
                              
 
     x_pak, _ = pak.gmres(params['A'],
