@@ -7,20 +7,11 @@ import matplotlib.pylab as plt
 import scipy.optimize as spo
 import warnings
 
-def gmres_e(A,b ,x0, k,
+def gmres_e(A, b ,x0, k,
             conlist=[],
             pre = None):
 
-    # A = dic['A']
-    # b = dic['b']
-    # M = dic['M']
-    # L = dic['L']
-    # omega = dic['omega']
-    # m0 = dic['m0']
-    # mo0 = dic['mo0']
-    # e0 = dic['e0']
-    
-    
+  
     #If not using preconditioner, set up identity as placeholder
     if pre is None:
         pre = np.identity(np.size(A[0,:]))
@@ -71,16 +62,6 @@ def gmres_e(A,b ,x0, k,
 
         def jac(z):
             out = np.zeros_like(z)
-            # #original term
-            # F = r - A @ Q @ z
-            # #Component wise differentiation of F
-            # for j in range(len(z)):
-            #     ej = np.zeros_like(z)
-            #     ej[j] = 1 
-            #     dF = - A @ Q @ ej
-
-            #     #assemble j-th component of jac
-            #     out[j] = 2 * np.inner(dF,F)
 
             #original term
             F = res - h[:j+2,:j+1] @ z
@@ -117,18 +98,11 @@ def gmres_e(A,b ,x0, k,
                           "args": (x0,Q)})
 
 
-        tol=1e-15
         #Initialise guess
         y0 = np.zeros((j+1,))
+        if j!=0:
+            y0[:-1] = yk
 
-        # print('r', r.shape)
-        # print('A', A.shape)
-        # print('Q', Q.shape)
-        # print('y0', y0.shape)
-
-        # print(jac(y0))
-        
-        # input('p')
 
         #For the first iteration just use gmres
         solve = spo.minimize(func,y0,tol=tol,jac=jac,hess=hess,
@@ -138,6 +112,7 @@ def gmres_e(A,b ,x0, k,
                                       'gtol': 1e-12,
                                       'barrier_tol': 1e-12,
                                       'maxiter': 1e3})
+
 
         if solve.message!='Optimization terminated successfully':
             if solve.message!='`xtol` termination condition is satisfied.':
