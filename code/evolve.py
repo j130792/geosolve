@@ -25,6 +25,8 @@ def kdv2(N=100,M=50,degree=1,k=10):
     z0 = refd.nptofd(prob,z)
     sol.append(z0)
 
+    ufile = File('u.pvd')
+    
     #Iteratively solve the remaining steps
     for i in range(1,N):
         #Update forms
@@ -34,10 +36,13 @@ def kdv2(N=100,M=50,degree=1,k=10):
         #Solve
         z, _ = kdvsolve(forms, x0=np.zeros_like(forms['b']), k=10)
         #Convert back to FD
-        z0 = refd.nptofd(prob,z)
+        z0.assign(refd.nptofd(prob,z))
         #Append
         sol.append(z0)
-    
+
+        ufile.write(z0.sub(0),time=i/10)
+
+        
 
 
     return -1
