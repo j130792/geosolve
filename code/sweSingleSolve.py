@@ -10,7 +10,7 @@ import scipy.sparse as sps
 import swe
 import refd2 as refd
 from solve import gmres
-from swesolver import swesolver
+from sweLinearSolver import swesolver
 import sweVisualise as vis
 
 

@@ -6,7 +6,6 @@ from prettytable import PrettyTable
 
 # local
 import swe
-import swesolver
 import refd2 as refd
 import solve
 

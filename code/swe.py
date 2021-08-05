@@ -140,6 +140,7 @@ def compute_invariants(prob,uvec):
     u,rho = z.split()
     mass = assemble(rho*dx)
     energy = assemble(0.5 * inner(u,u)*dx + 0.5*prob.c**2 * rho**2*dx)
+    pv = 0 
     
     inv_dict = {'mass' : mass,
                 'energy' : energy}
