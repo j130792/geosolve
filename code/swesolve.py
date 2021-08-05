@@ -11,12 +11,12 @@ import swe
 import refd2 as refd
 from solve import gmres
 from swesolver import swesolver
-import visualise as vis
+import sweVisualise as vis
 
 
 if __name__=="__main__":
 
-    params, prob = swe.linforms(degree=1)
+    params, prob = swe.linforms(degree=2)
 
     k = 20
 
@@ -50,14 +50,13 @@ if __name__=="__main__":
     print('gmres error on standard =', np.max(np.abs(x_pak-x)/x))
 
     #compute invariants for pyamg solve
-    input('first pause')
-    invamg = swe.compute_invariants(prob,x_pak,z0)
+    invamg = swe.compute_invariants(prob,x_pak)
     print('pyamg mass deviation =', invamg['mass']-params['m0'])
     print('pyamg energy deviation =', invamg['energy']-params['e0'])
 
     
     #compute invariants for direct solve
-    invdir = swe.compute_invariants(prob,x_dir,z0)
+    invdir = swe.compute_invariants(prob,x_dir)
     print('direct solver mass deviation =', invdir['mass']-params['m0'])
     print('direct solver energy deviation =', invdir['energy']-params['e0'])
     

@@ -137,7 +137,7 @@ def compute_invariants(prob,uvec):
         
     z = refd.nptofd(prob,uvec)
     
-    u,rho = z.split())
+    u,rho = z.split()
     mass = assemble(rho*dx)
     energy = assemble(0.5 * inner(u,u)*dx + 0.5*prob.c**2 * rho**2*dx)
     

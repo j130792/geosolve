@@ -30,7 +30,7 @@ def swesolver(dic,x0,k):
 
 
     #And stuff them in a list
-    conlist = [const_energy]
+    conlist = [const_mass,const_energy]
 
 
     out = gmres_e(A=A,b=b,x0=x0,k=k,
