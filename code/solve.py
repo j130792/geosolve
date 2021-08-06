@@ -27,19 +27,20 @@ class krylov_counter_gmres(object):
 
 def gmres(A, b, x0, k, M = None):
 
-    #If not using preconditioner, set up identity as placeholder
-    if M is None:
-        M = np.identity(np.size(A[0,:]))
+    # #If not using preconditioner, set up identity as placeholder
+    # if M is None:
+    #     M = np.identity(np.size(A[0,:]))
 
-    #Check preconditioner dimensions make sense
-    if np.shape(A)!=np.shape(M):
-        raise ValueError('The matrix A must have the same structure',
-                         ' as preconditioner M')
+    # #Check preconditioner dimensions make sense
+    # if np.shape(A)!=np.shape(M):
+    #     raise ValueError('The matrix A must have the same structure',
+    #                      ' as preconditioner M')
         
     x = []
     residual = []
-    r = (b - np.dot(A,x0)) #define r0
-
+    
+    r = (b - A.dot(x0)) #define r0
+    
     x.append(r)
 
          
@@ -48,13 +49,13 @@ def gmres(A, b, x0, k, M = None):
     beta = np.linalg.norm(r)
     
     q[0] = r / beta #normalise r0
-    
+
     #convert type
     
     h = np.zeros((k+1,k))
     
     for j in range(k):
-        y = np.asarray(A @ M @ q[j])
+        y = np.asarray(A.dot(q[j]))
         
         for i in range(j+1):
             h[i,j] = np.dot(q[i],y)
@@ -68,14 +69,16 @@ def gmres(A, b, x0, k, M = None):
         
         yk = np.linalg.lstsq(h[:j+2,:j+1], res)[0]
         
-        x.append(M @ np.transpose(q[:j+1,:]) @ yk + x0)
-        residual.append(np.linalg.norm(A @ x[-1] - b))
+        x.append(np.transpose(q[:j+1,:]) @ yk + x0)
+        residual.append(np.linalg.norm(A.dot(x[-1]) - b))
 
     #Build output dictionary
     dict = {'name': 'gmres',
             'x':x,
             'res':residual}
 
+    print('success!')
+    
     return x[-1], dict
 
 

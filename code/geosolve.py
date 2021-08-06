@@ -14,18 +14,18 @@ def gmres_e(A, b ,x0, k,
     #Set tolerance
     tol=1e-15
     
-    #If not using preconditioner, set up identity as placeholder
-    if pre is None:
-        pre = np.identity(np.size(A[0,:]))
+    # #If not using preconditioner, set up identity as placeholder
+    # if pre is None:
+    #     pre = np.identity(np.size(A[0,:]))
 
-    #Check preconditioner dimensions make sense
-    if np.shape(A)!=np.shape(pre):
-        raise ValueError('The matrix A must have the same structure',
-                         ' as preconditioner M')
+    # #Check preconditioner dimensions make sense
+    # if np.shape(A)!=np.shape(pre):
+    #     raise ValueError('The matrix A must have the same structure',
+    #                      ' as preconditioner M')
         
     x = []
     residual = []
-    r = (b - np.dot(A,x0)) #define r0
+    r = (b - A.dot(x0)) #define r0
 
     x.append(r)
 
@@ -41,7 +41,7 @@ def gmres_e(A, b ,x0, k,
     h = np.zeros((k+1,k))
     
     for j in range(k):
-        y = np.asarray(A @ pre @ q[j])
+        y = np.asarray(A.dot(q[j]))
         
         for i in range(j+1):
             h[i,j] = np.dot(q[i],y)
@@ -123,10 +123,10 @@ def gmres_e(A, b ,x0, k,
         #print(solve)
         yk = solve.x
         
-        x.append(pre @ Q @ yk + x0)
+        x.append(Q @ yk + x0)
 
         #Compute residual
-        residual.append(np.linalg.norm(A @ x[-1] - b))
+        residual.append(np.linalg.norm(A.dot(x[-1]) - b))
 
 
     #build output dictionary
