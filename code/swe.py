@@ -38,7 +38,7 @@ class problem(object):
         return rho, dict
         
 
-def linforms(N=100,M=5,degree=1,T=10,zinit=None):
+def linforms(N=100,M=50,degree=1,T=10,zinit=None):
     #set up problem class
     prob = problem(N=N,M=M,degree=degree,T=T)
     #Set up finite element stuff
@@ -91,11 +91,9 @@ def linforms(N=100,M=5,degree=1,T=10,zinit=None):
 
     
     #Read out A and b
-    # print(assemble(lhs(F),mat_type='aij').M.handle)
-    # input('')
-    # A = assemble(lhs(F),mat_type='aij').M.handle.getValuesCSR()
-    # A = sp.sparse.csr_matrix((A[2],A[1],A[0]))
-    A = assemble(lhs(F),mat_type='aij').M.values
+    A = assemble(lhs(F),mat_type='aij').M.handle.getValuesCSR()
+    A = sp.sparse.csr_matrix((A[2],A[1],A[0]))
+    #A = assemble(lhs(F),mat_type='aij').M.values ##Only works for very small problems
     b = refd.combine(assemble(rhs(F)).dat.data)
 
     
@@ -106,7 +104,8 @@ def linforms(N=100,M=5,degree=1,T=10,zinit=None):
 
     #And for L
     L_form = inner(u_trial, phi) * dx + prob.c**2*rho_trial*psi * dx
-    L = assemble(lhs(L_form),mat_type='aij').M.values
+    L = assemble(lhs(L_form),mat_type='aij').M.handle.getValuesCSR()
+    L = sp.sparse.csr_matrix((L[2],L[1],L[0]))
 
     omega = refd.combine(assemble(psi * dx).dat.data)
     

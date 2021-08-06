@@ -16,7 +16,7 @@ import sweVisualise as vis
 
 if __name__=="__main__":
 
-    params, prob = swe.linforms(degree=2)
+    params, prob = swe.linforms(degree=1)
 
     k = 20
 
