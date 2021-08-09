@@ -11,14 +11,12 @@ class problem(object):
     def __init__(self,N,M,degree,T):
         self.degree = degree
         self.dim = 1
-
-        self.c = 1
         
         self.N = N
         self.M = M
         self.T = T
         self.dt = float(T)/N
-        self.mesh = UnitSquareMesh(self.M,self.M)
+        self.mesh = PeriodicUnitSquareMesh(self.M,self.M)
 
     def function_space(self,mesh):
         CG = FunctionSpace(mesh,'CG',self.degree)
@@ -69,7 +67,7 @@ def linforms(N=100,M=50,degree=1,T=10,zinit=None):
     zmid = 0.5 * (z_trial + z0)
 
     F = zt * phi * dx \
-        + prob.c * inner(grad(z_trial), grad(phi)) * dx
+        - inner(grad(zmid), grad(phi)) * dx
 
     
     #Read out A and b
@@ -93,7 +91,7 @@ def linforms(N=100,M=50,degree=1,T=10,zinit=None):
     Lz0 = L.dot(z_)
 
     #And for the old 'energy'
-    old_energy = 0.5 * L.dot(z_).dot(z_) + 0.5 * M.dot(z_).dot(z_)
+    old_energy = 0.25 * prob.dt * L.dot(z_).dot(z_) + 0.5 * M.dot(z_).dot(z_)
     
 
     #And don't forget mass
@@ -116,6 +114,7 @@ def linforms(N=100,M=50,degree=1,T=10,zinit=None):
         'm0': m0,
         'e0': e0,
         'z0': z_, #included for debugging
+        'dt': prob.dt,
     }
         
     return out, prob
@@ -135,7 +134,7 @@ def compute_invariants(prob,uvec,uold):
     zmid = 0.5 * (z + z_)
     mass = assemble(z*dx)
     energy = assemble(0.5 * z**2*dx - 0.5 * z_**2*dx
-                      -inner(grad(zmid),grad(zmid))*dx)
+                      -prob.dt * inner(grad(zmid),grad(zmid))*dx)
     
     inv_dict = {'mass' : mass,
                 'energy' : energy}
