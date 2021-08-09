@@ -118,8 +118,9 @@ def gmres_e(A, b ,x0, k,
 
         if solve.message!='Optimization terminated successfully':
             if solve.message!='`xtol` termination condition is satisfied.':
-                warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
-                              RuntimeWarning)
+                if solve.message!='`gtol` termination condition is satisfied.':
+                    warnings.warn("Iteration %d failed with message '%s'" % (j,solve.message),
+                                  RuntimeWarning)
         #print(solve)
         yk = solve.x
         
