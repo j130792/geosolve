@@ -28,8 +28,8 @@ def heatsolver(dic,x0,k):
     
     def const_energy(z,x0,Q):#Depends on x0 and Q
         X = x0 + Q @ z
-        out = 0.5 * X @ M @ X - 0.25 * dt * X @ L @ X \
-            - 0.5 * dt * Lz0 @ X - old_energy
+        out = 0.5 * X @ M @ X + 0.25 * dt * X @ L @ X \
+            + 0.5 * dt * X @ Lz0 - old_energy
         return out
 
 

@@ -16,7 +16,7 @@ import heatVisualise as vis
 
 if __name__=="__main__":
 
-    params, prob = heat.linforms(degree=1)
+    params, prob = heat.linforms(degree=2)
 
     k = 20
 
