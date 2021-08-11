@@ -25,16 +25,22 @@ class krylov_counter_gmres(object):
     def num_its(self):
         return self.niter
 
-def gmres(A, b, x0, k, M = None):
+def gmres(A, b, x0, k, pre = None):
 
-    # #If not using preconditioner, set up identity as placeholder
-    # if M is None:
-    #     M = np.identity(np.size(A[0,:]))
+    #If not using preconditioner, set up identity as placeholder
+    if pre is None:
+        pre = sps.identity(len(b))
 
-    # #Check preconditioner dimensions make sense
-    # if np.shape(A)!=np.shape(M):
-    #     raise ValueError('The matrix A must have the same structure',
-    #                      ' as preconditioner M')
+    if hasattr(pre, 'solve'):#Check if spsla.LinearOperator object
+        def prefunc(vec):
+            return pre.solve(vec)
+    else:
+        def prefunc(vec):
+            try:
+                out = pre @ vec
+            except:
+                raise ValueError('Preconditioner not supported')
+            return out
         
     x = []
     residual = []
@@ -55,7 +61,7 @@ def gmres(A, b, x0, k, M = None):
     h = np.zeros((k+1,k))
     
     for j in range(k):
-        y = np.asarray(A.dot(q[j]))
+        y = np.asarray(A @ prefunc(q[j]))
         
         for i in range(j+1):
             h[i,j] = np.dot(q[i],y)
@@ -69,7 +75,7 @@ def gmres(A, b, x0, k, M = None):
         
         yk = np.linalg.lstsq(h[:j+2,:j+1], res)[0]
         
-        x.append(np.transpose(q[:j+1,:]) @ yk + x0)
+        x.append(prefunc(np.transpose(q[:j+1,:])) @ yk + x0)
         residual.append(np.linalg.norm(A.dot(x[-1]) - b))
 
     #Build output dictionary

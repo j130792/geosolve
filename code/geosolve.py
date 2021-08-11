@@ -5,6 +5,7 @@ Here we construct modified gmres algorithms
 import numpy as np
 import matplotlib.pylab as plt
 import scipy.optimize as spo
+import scipy.sparse as sps
 import warnings
 
 def gmres_e(A, b ,x0, k,
@@ -14,14 +15,20 @@ def gmres_e(A, b ,x0, k,
     #Set tolerance
     tol=1e-15
     
-    # #If not using preconditioner, set up identity as placeholder
-    # if pre is None:
-    #     pre = np.identity(np.size(A[0,:]))
+    #If not using preconditioner, set up identity as placeholder
+    if pre is None:
+        pre = sps.identity(len(b))
 
-    # #Check preconditioner dimensions make sense
-    # if np.shape(A)!=np.shape(pre):
-    #     raise ValueError('The matrix A must have the same structure',
-    #                      ' as preconditioner M')
+    if hasattr(pre, 'solve'):#Check if spsla.LinearOperator object
+        def prefunc(vec):
+            return pre.solve(vec)
+    else:
+        def prefunc(vec):
+            try:
+                out = pre @ vec
+            except:
+                raise ValueError('Preconditioner not supported')
+            return out
         
     x = []
     residual = []
@@ -41,7 +48,7 @@ def gmres_e(A, b ,x0, k,
     h = np.zeros((k+1,k))
     
     for j in range(k):
-        y = np.asarray(A.dot(q[j]))
+        y = np.asarray(A @ prefunc(q[j]))
         
         for i in range(j+1):
             h[i,j] = np.dot(q[i],y)
@@ -97,7 +104,7 @@ def gmres_e(A, b ,x0, k,
         for const in conlist:
             clist.append({"type": "eq",
                           "fun": const,
-                          "args": (x0,Q)})
+                          "args": (x0,prefunc(Q))})
 
 
         #Initialise guess
@@ -124,7 +131,7 @@ def gmres_e(A, b ,x0, k,
         #print(solve)
         yk = solve.x
         
-        x.append(Q @ yk + x0)
+        x.append(prefunc(Q) @ yk + x0)
 
         #Compute residual
         residual.append(np.linalg.norm(A.dot(x[-1]) - b))
