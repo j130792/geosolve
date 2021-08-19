@@ -7,7 +7,7 @@ import numpy as np
 #Local
 from geosolve import gmres_e
 
-def heatsolver(dic,x0,k):
+def heatsolver(dic,x0,k,pre=None):
 
     A = dic['A']
     b = dic['b']
@@ -34,10 +34,11 @@ def heatsolver(dic,x0,k):
 
 
     #And stuff them in a list
-    conlist = [const_energy]
+    conlist = [const_mass,const_energy]
 
 
     out = gmres_e(A=A,b=b,x0=x0,k=k,
-                  conlist=conlist)
+                  conlist=conlist,
+                  pre=pre)
     return out
 
