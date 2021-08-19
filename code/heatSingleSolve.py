@@ -31,8 +31,6 @@ if __name__=="__main__":
     z0 = Function(Z)
     x, y = SpatialCoordinate(prob.mesh)
     z0.assign(project(prob.exact(x,y,0.),Z))
-    # for w in range(len(z0.dat.data)):
-    #     z0.dat.data[w] = random.random()
     
     x, solvedict = gmres(params['A'],
                          params['b'],

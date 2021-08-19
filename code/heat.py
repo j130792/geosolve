@@ -27,7 +27,8 @@ class problem(object):
         """
         An "exact" initial condition for the linear KdV equation
         """
-        u = sin(2*pi*x) * sin(2*pi*y) * exp(-8*pi**2*(t)) + 1
+        u = sin(10*pi*x) * sin(6*pi*y) * exp(-8*pi**2*(t)) + 1 #lumps
+        u = 1e3 * ( (x * (x-1))**5 + (y * (y - 1))**6 ) #a big bi-polynomial
         return u
         
 
@@ -49,13 +50,11 @@ def linforms(N=100,M=50,degree=1,T=10,zinit=None):
     
     if zinit==None:
         z0.assign(project(prob.exact(x[0],x[1],t),Z))
-        # for w in range(len(z0.dat.data)):
-        #     z0.dat.data[w] = random.random()
     else:
         z0.assign(zinit)
 
-    # tripcolor(z0)
-    # plt.show()
+    tripcolor(z0)
+    plt.show()
 
     #Define timestep
     dt = prob.dt
