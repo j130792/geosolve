@@ -13,6 +13,7 @@ from solve import gmres
 from heatLinearSolver import heatsolver
 import heatVisualise as vis
 
+import random
 
 if __name__=="__main__":
 
@@ -20,22 +21,31 @@ if __name__=="__main__":
 
     k = 20
 
+    #Define preconditioner
+    M = spsla.spilu(params['A'], drop_tol=1e-3,
+                    fill_factor = 10)
+
+    
     #Get initial conditions
     Z = prob.function_space(prob.mesh)
     z0 = Function(Z)
     x, y = SpatialCoordinate(prob.mesh)
     z0.assign(project(prob.exact(x,y,0.),Z))
+    # for w in range(len(z0.dat.data)):
+    #     z0.dat.data[w] = random.random()
     
     x, solvedict = gmres(params['A'],
                          params['b'],
                          x0=np.zeros_like(params['b']),
-                         k=k)
+                         k=k,
+                         pre=M)
     #Append old value of z to dictionary
     solvedict['z0'] = z0
         
     x_con, geodict = heatsolver(params,
                                 x0=np.zeros_like(params['b']),
-                                k=k)
+                                k=k,
+                                pre=M)
     #Append old value of z to dictionary
     geodict['z0'] = z0
 
