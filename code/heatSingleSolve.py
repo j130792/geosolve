@@ -24,7 +24,6 @@ if __name__=="__main__":
     #Define preconditioner
     M = spsla.spilu(params['A'], drop_tol=1e-3,
                     fill_factor = 10)
-
     
     #Get initial conditions
     Z = prob.function_space(prob.mesh)
@@ -73,5 +72,5 @@ if __name__=="__main__":
     
     input('pause')
     
-    vis.tabulator(params,prob,[solvedict,geodict])
+    vis.convergence_plot(vis.tabulator(params,prob,[solvedict,geodict]))
         
